@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talonario de Rifa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .info {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .precio {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .instrucciones {
+            color: #6c757d;
+            font-size: 1.1em;
+        }
+
+        .talonario {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 10px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .numero {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .numero:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            border-color: #4CAF50;
+        }
+
+        .numero.seleccionado {
+            background: #4CAF50;
+            color: white;
+            border-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .numero.reservado {
+            background: #dc3545;
+            color: white;
+            border-color: #c82333;
+            cursor: not-allowed;
+        }
+
+        .numero.reservado:hover {
+            transform: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .formulario {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .formulario h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .numeros-seleccionados {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .numeros-seleccionados strong {
+            color: #4CAF50;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .botones {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .mensaje {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .mensaje.mostrar {
+            transform: translateX(0);
+        }
+
+        .mensaje.exito {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .mensaje.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .notificacion {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .notificacion.mostrar {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .config-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .config-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .sync-status {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        .sync-status.online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .sync-status.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .sync-status.synced {
+            color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .sync-status.error {
+            color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+
+        .sync-status.syncing {
+            color: #ff9800;
+            background: rgba(255, 152, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .talonario {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+                padding: 20px;
+            }
+
+            .numero {
+                font-size: 1em;
+            }
+
+            .formulario {
+                padding: 20px;
+            }
+
+            .botones {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sync-status" id="syncStatus">🔄 Conectando...</div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Talonario de Rifa</h1>
+            <p>Selecciona tus números y regístrate</p>
+        </div>
+
+        <div class="info">
+            <div class="precio">Precio por número: $10.00</div>
+            <div class="instrucciones">Selecciona los números que deseas y completa tus datos</div>
+            <button id="configGitHub" class="config-btn" onclick="configurarGitHub()" title="Configurar sincronización con GitHub">
+                ⚙️ Configurar GitHub
+            </button>
+        </div>
+
+        <div class="talonario" id="talonario">
+            <!-- Los números se generan dinámicamente -->
+        </div>
+
+        <div class="formulario" id="formulario">
+            <h3>Completa tu información</h3>
+            
+            <div class="numeros-seleccionados">
+                <strong>Números seleccionados:</strong> <span id="numerosSeleccionadosLista"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="nombre">Nombre completo:</label>
+                <input type="text" id="nombre" placeholder="Ingresa tu nombre completo" required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono:</label>
+                <input type="tel" id="telefono" placeholder="Ingresa tu número de teléfono" required>
+            </div>
+
+            <div class="botones">
+                <button class="btn btn-primary" id="btnReservar">Reservar Números</button>
+                <button class="btn btn-secondary" id="btnCancelar">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mensaje" id="mensaje"></div>
+    <div class="notificacion" id="notificacion"></div>
+
+    <script>
+        // Variables globales
+        let reservas = {};
+        let numerosSeleccionados = [];
+        let syncInterval = null;
+        let isOnline = navigator.onLine;
+
+        // Elementos DOM
+        const talonario = document.getElementById('talonario');
+        const formulario = document.getElementById('formulario');
+        const mensaje = document.getElementById('mensaje');
+        const notificacion = document.getElementById('notificacion');
+        const numerosSeleccionadosLista = document.getElementById('numerosSeleccionadosLista');
+        const btnReservar = document.getElementById('btnReservar');
+        const btnCancelar = document.getElementById('btnCancelar');
+        const inputNombre = document.getElementById('nombre');
+        const inputTelefono = document.getElementById('telefono');
+        const syncStatus = document.getElementById('syncStatus');
+
+        // Sistema de sincronización alternativo usando localStorage + polling
+        class SyncManager {
+            constructor() {
+                this.lastSync = null;
+                this.syncInProgress = false;
+                this.gistId = localStorage.getItem('gistId') || null;
+                this.githubToken = localStorage.getItem('githubToken') || null;
+            }
+
+            async guardarReservas(reservas) {
+                try {
+                    // Guardar localmente primero
+                    localStorage.setItem('reservas', JSON.stringify(reservas));
+                    localStorage.setItem('lastUpdate', Date.now().toString());
+                    
+                    // Notificar a otras pestañas
+                    if ('BroadcastChannel' in window) {
+                        const channel = new BroadcastChannel('talonario_sync');
+                        channel.postMessage({
+                            type: 'update',
+                            data: reservas,
+                            timestamp: Date.now()
+                        });
+                    }
+                    
+                    // Sincronizar con GitHub si está configurado
+                    if (this.githubToken && this.gistId) {
+                        await this.syncToGitHub(reservas);
+                    }
+                    
+                    console.log('💾 Reservas guardadas localmente');
+                    return true;
+                } catch (error) {
+                    console.error('❌ Error guardando reservas:', error);
+                    return false;
+                }
+            }
+
+            async cargarReservas() {
+                try {
+                    // Intentar cargar desde GitHub primero si está configurado
+                    if (this.githubToken && this.gistId) {
+                        const reservasGitHub = await this.loadFromGitHub();
+                        if (reservasGitHub) {
+                            localStorage.setItem('reservas', JSON.stringify(reservasGitHub));
+                            console.log('☁️ Reservas cargadas desde GitHub');
+                            return reservasGitHub;
+                        }
+                    }
+                    
+                    // Cargar desde localStorage como fallback
+                    const reservasGuardadas = localStorage.getItem('reservas');
+                    if (reservasGuardadas) {
+                        console.log('📂 Reservas cargadas desde localStorage');
+                        return JSON.parse(reservasGuardadas);
+                    }
+                    return {};
+                } catch (error) {
+                    console.error('❌ Error cargando reservas:', error);
+                    return {};
+                }
+            }
+
+            async syncToGitHub(reservas) {
+                if (!this.githubToken || !this.gistId) return false;
+                
+                try {
+                    const response = await fetch(`https://api.github.com/gists/${this.gistId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `token ${this.githubToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            files: {
+                                'reservas.json': {
+                                    content: JSON.stringify({
+                                        reservas: reservas,
+                                        lastUpdate: Date.now(),
+                                        version: '1.0'
+                                    }, null, 2)
+                                }
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        console.log('☁️ Sincronizado con GitHub exitosamente');
+                        this.updateSyncStatus('synced');
+                        return true;
+                    } else {
+                        console.error('❌ Error sincronizando con GitHub:', response.status);
+                        this.updateSyncStatus('error');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('❌ Error en sincronización GitHub:', error);
+                    this.updateSyncStatus('error');
+                    return false;
+                }
+            }
+
+            async loadFromGitHub() {
+                if (!this.githubToken || !this.gistId) return null;
+                
+                try {
+                    const response = await fetch(`https://api.github.com/gists/${this.gistId}`, {
+                        headers: {
+                            'Authorization': `token ${this.githubToken}`,
+                        }
+                    });
+
+                    if (response.ok) {
+                        const gist = await response.json();
+                        const content = gist.files['reservas.json']?.content;
+                        if (content) {
+                            const data = JSON.parse(content);
+                            return data.reservas || {};
+                        }
+                    }
+                    return null;
+                } catch (error) {
+                    console.error('❌ Error cargando desde GitHub:', error);
+                    return null;
+                }
+            }
+
+            async createGitHubGist(token) {
+                try {
+                    const response = await fetch('https://api.github.com/gists', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            description: 'Talonario de Rifa - Reservas',
+                            public: false,
+                            files: {
+                                'reservas.json': {
+                                    content: JSON.stringify({
+                                        reservas: {},
+                                        lastUpdate: Date.now(),
+                                        version: '1.0'
+                                    }, null, 2)
+                                }
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const gist = await response.json();
+                        this.gistId = gist.id;
+                        localStorage.setItem('gistId', this.gistId);
+                        localStorage.setItem('githubToken', token);
+                        this.githubToken = token;
+                        console.log('✅ Gist creado exitosamente:', this.gistId);
+                        return true;
+                    } else {
+                        console.error('❌ Error creando Gist:', response.status);
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('❌ Error creando Gist:', error);
+                    return false;
+                }
+            }
+
+            escucharCambios() {
+                console.log('🔔 Configurando sincronización...');
+                
+                // Usar BroadcastChannel para sincronización entre pestañas
+                if ('BroadcastChannel' in window) {
+                    const channel = new BroadcastChannel('talonario_sync');
+                    channel.onmessage = (event) => {
+                        if (event.data.type === 'update') {
+                            console.log('🔄 Actualización recibida de otra pestaña');
+                            const nuevasReservas = event.data.data;
+                            
+                            // Detectar nuevos números
+                            const numerosNuevos = Object.keys(nuevasReservas).filter(num => !reservas[num]);
+                            if (numerosNuevos.length > 0) {
+                                mostrarNotificacion(`Nuevas reservas: ${numerosNuevos.join(', ')}`);
+                            }
+                            
+                            reservas = nuevasReservas;
+                            generarTalonario();
+                        }
+                    };
+                }
+
+                // Polling para detectar cambios externos (cada 10 segundos)
+                syncInterval = setInterval(() => {
+                    this.checkForUpdates();
+                }, 10000);
+
+                this.updateSyncStatus('online');
+            }
+
+            async checkForUpdates() {
+                try {
+                    const lastUpdate = localStorage.getItem('lastUpdate');
+                    const currentTime = Date.now();
+                    
+                    // Simular check de actualizaciones
+                    if (Math.random() < 0.1) { // 10% chance de simular actualización externa
+                        console.log('🔄 Simulando actualización externa...');
+                        // En un sistema real, aquí harías una llamada a tu API
+                    }
+                } catch (error) {
+                    console.log('⚠️ Error en sincronización:', error);
+                    this.updateSyncStatus('offline');
+                }
+            }
+
+            updateSyncStatus(status) {
+                const statusMessages = {
+                    'online': '✅ Sincronizado localmente',
+                    'synced': '☁️ Sincronizado con GitHub',
+                    'syncing': '🔄 Sincronizando...',
+                    'error': '❌ Error de sincronización',
+                    'offline': '⚠️ Sin conexión'
+                };
+                
+                if (syncStatus) {
+                    syncStatus.textContent = statusMessages[status] || '❓ Estado desconocido';
+                    syncStatus.className = `sync-status ${status}`;
+                }
+            }
+
+            // Configurar GitHub
+            async configureGitHub() {
+                const token = prompt('Ingresa tu GitHub Personal Access Token:\n\n1. Ve a GitHub.com > Settings > Developer settings > Personal access tokens\n2. Genera un nuevo token con permisos "gist"\n3. Copia y pega el token aquí:');
+                
+                if (token && token.trim()) {
+                    const success = await this.createGitHubGist(token.trim());
+                    if (success) {
+                        mostrarNotificacion('✅ GitHub configurado exitosamente');
+                        this.updateSyncStatus('synced');
+                        return true;
+                    } else {
+                        mostrarNotificacion('❌ Error configurando GitHub');
+                        return false;
+                    }
+                }
+                return false;
+            }
+        }
+
+        const syncManager = new SyncManager();
+
+        // Funciones principales
+        function generarTalonario() {
+            talonario.innerHTML = '';
+            for (let i = 0; i < 100; i++) {
+                const numero = i.toString().padStart(2, '0');
+                const div = document.createElement('div');
+                div.className = 'numero';
+                div.textContent = numero;
+                div.dataset.numero = numero;
+                
+                if (reservas[numero]) {
+                    div.classList.add('reservado');
+                    div.title = `Reservado por: ${reservas[numero].nombre}\nTeléfono: ${reservas[numero].telefono}`;
+                } else {
+                    div.addEventListener('click', seleccionarNumero);
+                    if (numerosSeleccionados.includes(numero)) {
+                        div.classList.add('seleccionado');
+                    }
+                }
+                
+                talonario.appendChild(div);
+            }
+        }
+
+        function seleccionarNumero(e) {
+            const numero = e.target.dataset.numero;
+            
+            if (numerosSeleccionados.includes(numero)) {
+                numerosSeleccionados = numerosSeleccionados.filter(n => n !== numero);
+                e.target.classList.remove('seleccionado');
+            } else {
+                numerosSeleccionados.push(numero);
+                e.target.classList.add('seleccionado');
+            }
+            
+            actualizarFormulario();
+        }
+
+        function actualizarFormulario() {
+            if (numerosSeleccionados.length > 0) {
+                numerosSeleccionadosLista.textContent = numerosSeleccionados.join(', ');
+                formulario.style.display = 'block';
+                formulario.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                formulario.style.display = 'none';
+            }
+        }
+
+        function mostrarMensaje(texto, tipo) {
+            mensaje.textContent = texto;
+            mensaje.className = `mensaje ${tipo}`;
+            mensaje.classList.add('mostrar');
+            
+            setTimeout(() => {
+                mensaje.classList.remove('mostrar');
+            }, 3000);
+        }
+
+        function mostrarNotificacion(texto) {
+            notificacion.textContent = texto;
+            notificacion.classList.add('mostrar');
+            
+            setTimeout(() => {
+                notificacion.classList.remove('mostrar');
+            }, 5000);
+        }
+
+        // Event Listeners
+        btnReservar.addEventListener('click', async function() {
+            console.log('🎯 Botón reservar presionado');
+            
+            const nombre = inputNombre.value.trim();
+            const telefono = inputTelefono.value.trim();
+            
+            if (!nombre || !telefono) {
+                mostrarMensaje('Por favor completa todos los campos', 'error');
+                return;
+            }
+            
+            if (numerosSeleccionados.length === 0) {
+                mostrarMensaje('Selecciona al menos un número', 'error');
+                return;
+            }
+            
+            // Guardar reservas
+            numerosSeleccionados.forEach(numero => {
+                reservas[numero] = {
+                    nombre: nombre,
+                    telefono: telefono,
+                    fecha: new Date().toISOString()
+                };
+            });
+            
+            console.log('📊 Reservas actualizadas:', reservas);
+            
+            // Guardar usando el sistema de sincronización
+            await syncManager.guardarReservas(reservas);
+            
+            mostrarMensaje(`¡Números ${numerosSeleccionados.join(', ')} reservados exitosamente para ${nombre}!`, 'exito');
+            
+            // Limpiar
+            numerosSeleccionados = [];
+            inputNombre.value = '';
+            inputTelefono.value = '';
+            
+            generarTalonario();
+            formulario.style.display = 'none';
+        });
+
+        btnCancelar.addEventListener('click', function() {
+            numerosSeleccionados = [];
+            inputNombre.value = '';
+            inputTelefono.value = '';
+            generarTalonario();
+            formulario.style.display = 'none';
+        });
+
+        // Detectar cambios de conectividad
+        window.addEventListener('online', () => {
+            isOnline = true;
+            syncManager.updateSyncStatus('online');
+            mostrarNotificacion('Conexión restaurada - Sincronizando...');
+        });
+
+        window.addEventListener('offline', () => {
+            isOnline = false;
+            syncManager.updateSyncStatus('offline');
+            mostrarNotificacion('Sin conexión - Los datos se guardan localmente');
+        });
+
+        // Función global para configurar GitHub
+        async function configurarGitHub() {
+            const success = await syncManager.configureGitHub();
+            if (success) {
+                // Recargar reservas desde GitHub
+                reservas = await syncManager.cargarReservas();
+                generarTalonario();
+            }
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Iniciando Talonario de Rifa...');
+            
+            // Cargar reservas
+            reservas = await syncManager.cargarReservas();
+            
+            // Generar talonario
+            generarTalonario();
+            
+            // Configurar sincronización
+            syncManager.escucharCambios();
+            
+            // Verificar si GitHub está configurado
+            if (syncManager.githubToken && syncManager.gistId) {
+                syncManager.updateSyncStatus('synced');
+                console.log('☁️ GitHub configurado - Gist ID:', syncManager.gistId);
+            } else {
+                syncManager.updateSyncStatus('online');
+                console.log('📱 Solo sincronización local disponible');
+            }
+            
+            console.log('✅ Aplicación lista');
+            
+            // Mostrar mensaje de bienvenida
+            setTimeout(() => {
+                mostrarNotificacion('¡Bienvenido! Selecciona tus números de la suerte');
+            }, 1000);
+        });
+
+        // Limpiar interval al cerrar
+        window.addEventListener('beforeunload', () => {
+            if (syncInterval) {
+                clearInterval(syncInterval);
+            }
+        });
+    </script>
+</body>
+</html>

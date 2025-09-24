@@ -1,0 +1,21 @@
+{
+  "name": "Calculadora Móvil",
+  "short_name": "Calculadora",
+  "description": "Una calculadora simple para usar en dispositivos móviles",
+  "start_url": "./calculadora.html",
+  "display": "standalone",
+  "background_color": "#f9f9f9",
+  "theme_color": "#4285f4",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjNDI4NWY0IiBkPSJNMCAwaDUxMnY1MTJIMHoiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJNMTI4IDEyOGgyNTZ2NjRIMTI4em0wIDk2aDY0djY0aC02NHptOTYgMGg2NHY2NGgtNjR6bTk2IDBoNjR2NjRoLTY0em0tMTkyIDk2aDY0djY0aC02NHptOTYgMGg2NHY2NGgtNjR6bTk2IDBoNjR2NjRoLTY0em0tMTkyIDk2aDY0djY0aC02NHptOTYgMGg2NHY2NGgtNjR6bTk2IDBoNjR2NjRoLTY0eiIvPjwvc3ZnPg==",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjNDI4NWY0IiBkPSJNMCAwaDUxMnY1MTJIMHoiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJNMTI4IDEyOGgyNTZ2NjRIMTI4em0wIDk2aDY0djY0aC02NHptOTYgMGg2NHY2NGgtNjR6bTk2IDBoNjR2NjRoLTY0em0tMTkyIDk2aDY0djY0aC02NHptOTYgMGg2NHY2NGgtNjR6bTk2IDBoNjR2NjRoLTY0em0tMTkyIDk2aDY0djY0aC02NHptOTYgMGg2NHY2NGgtNjR6bTk2IDBoNjR2NjRoLTY0eiIvPjwvc3ZnPg==",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
