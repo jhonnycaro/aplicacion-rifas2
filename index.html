@@ -342,6 +342,12 @@
             <button id="configGitHub" class="config-btn" onclick="configurarGitHub()" title="Configurar sincronización con GitHub">
                 ⚙️ Configurar GitHub
             </button>
+            <button id="compartirBtn" class="config-btn" onclick="compartirReservas()" title="Compartir reservas actuales">
+                📤 Compartir Reservas
+            </button>
+            <button id="importarBtn" class="config-btn" onclick="importarReservas()" title="Importar reservas desde enlace">
+                📥 Importar Reservas
+            </button>
         </div>
 
         <div class="talonario" id="talonario">
@@ -785,12 +791,86 @@
             }
         }
 
+        // Función para compartir reservas mediante URL
+        function compartirReservas() {
+            if (Object.keys(reservas).length === 0) {
+                mostrarMensaje('No hay reservas para compartir', 'error');
+                return;
+            }
+
+            try {
+                // Comprimir datos de reservas
+                const datosComprimidos = btoa(JSON.stringify(reservas));
+                const urlCompartir = `${window.location.origin}${window.location.pathname}?reservas=${datosComprimidos}`;
+                
+                // Copiar al portapapeles
+                navigator.clipboard.writeText(urlCompartir).then(() => {
+                    mostrarMensaje('¡Enlace copiado al portapapeles! Compártelo con otros usuarios.', 'exito');
+                }).catch(() => {
+                    // Fallback si no funciona el portapapeles
+                    prompt('Copia este enlace para compartir las reservas:', urlCompartir);
+                });
+            } catch (error) {
+                console.error('Error compartiendo reservas:', error);
+                mostrarMensaje('Error al generar enlace para compartir', 'error');
+            }
+        }
+
+        // Función para importar reservas desde URL
+        function importarReservas() {
+            const enlace = prompt('Pega aquí el enlace con las reservas que quieres importar:');
+            if (!enlace) return;
+
+            try {
+                const url = new URL(enlace);
+                const reservasParam = url.searchParams.get('reservas');
+                
+                if (reservasParam) {
+                    const reservasImportadas = JSON.parse(atob(reservasParam));
+                    
+                    // Confirmar importación
+                    const numReservas = Object.keys(reservasImportadas).length;
+                    if (confirm(`¿Quieres importar ${numReservas} reservas? Esto reemplazará las reservas actuales.`)) {
+                        reservas = reservasImportadas;
+                        syncManager.guardarReservas(reservas);
+                        generarTalonario();
+                        mostrarMensaje(`¡${numReservas} reservas importadas exitosamente!`, 'exito');
+                    }
+                } else {
+                    mostrarMensaje('El enlace no contiene datos de reservas válidos', 'error');
+                }
+            } catch (error) {
+                console.error('Error importando reservas:', error);
+                mostrarMensaje('Error al importar reservas. Verifica que el enlace sea correcto.', 'error');
+            }
+        }
+
         // Inicialización
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🚀 Iniciando Talonario de Rifa...');
             
-            // Cargar reservas
-            reservas = await syncManager.cargarReservas();
+            // Verificar si hay reservas en la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const reservasParam = urlParams.get('reservas');
+            
+            if (reservasParam) {
+                try {
+                    const reservasDesdeURL = JSON.parse(atob(reservasParam));
+                    const numReservas = Object.keys(reservasDesdeURL).length;
+                    
+                    if (numReservas > 0) {
+                        reservas = reservasDesdeURL;
+                        await syncManager.guardarReservas(reservas);
+                        mostrarNotificacion(`¡${numReservas} reservas cargadas desde el enlace compartido!`);
+                        console.log('📥 Reservas cargadas desde URL:', numReservas);
+                    }
+                } catch (error) {
+                    console.error('Error cargando reservas desde URL:', error);
+                }
+            } else {
+                // Cargar reservas normalmente
+                reservas = await syncManager.cargarReservas();
+            }
             
             // Generar talonario
             generarTalonario();
