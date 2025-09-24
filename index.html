@@ -325,6 +325,127 @@
                 flex-direction: column;
             }
         }
+
+        /* Estilos para la lista de reservas */
+        .reservas-lista {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+
+        .reservas-lista h3 {
+            color: #495057;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .reserva-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reserva-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .reserva-nombre {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .reserva-telefono {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 2px;
+        }
+
+        .reserva-numeros {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .reserva-acciones {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-cancelar {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-cancelar:hover {
+            background: #c82333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .talonario {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+                padding: 20px;
+            }
+
+            .numero {
+                font-size: 1em;
+            }
+
+            .formulario {
+                padding: 20px;
+            }
+
+            .botones {
+                flex-direction: column;
+            }
+
+            .reserva-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .reserva-acciones {
+                align-self: flex-end;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .btn-cancelar {
+                font-size: 0.75em;
+                padding: 5px 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -337,21 +458,20 @@
         </div>
 
         <div class="info">
-            <div class="precio">Precio por número: $10.00</div>
             <div class="instrucciones">Selecciona los números que deseas y completa tus datos</div>
-            <button id="configGitHub" class="config-btn" onclick="configurarGitHub()" title="Configurar sincronización con GitHub">
-                ⚙️ Configurar GitHub
-            </button>
             <button id="compartirBtn" class="config-btn" onclick="compartirReservas()" title="Compartir reservas actuales">
                 📤 Compartir Reservas
-            </button>
-            <button id="importarBtn" class="config-btn" onclick="importarReservas()" title="Importar reservas desde enlace">
-                📥 Importar Reservas
             </button>
         </div>
 
         <div class="talonario" id="talonario">
             <!-- Los números se generan dinámicamente -->
+        </div>
+
+        <!-- Sección de reservas -->
+        <div class="reservas-lista" id="reservasLista" style="display: none;">
+            <h3>📋 Reservas Actuales</h3>
+            <div id="reservasContenido"></div>
         </div>
 
         <div class="formulario" id="formulario">
@@ -673,6 +793,100 @@
                 
                 talonario.appendChild(div);
             }
+            
+            // Actualizar la lista de reservas después de generar el talonario
+            mostrarListaReservas();
+        }
+
+        function mostrarListaReservas() {
+            const reservasLista = document.getElementById('reservasLista');
+            const reservasContenido = document.getElementById('reservasContenido');
+            
+            // Obtener todas las reservas y organizarlas por persona
+            const reservasPorPersona = {};
+            
+            Object.keys(reservas).forEach(numero => {
+                const reserva = reservas[numero];
+                const key = `${reserva.nombre}_${reserva.telefono}`;
+                
+                if (!reservasPorPersona[key]) {
+                    reservasPorPersona[key] = {
+                        nombre: reserva.nombre,
+                        telefono: reserva.telefono,
+                        numeros: []
+                    };
+                }
+                reservasPorPersona[key].numeros.push(numero);
+            });
+            
+            // Ordenar alfabéticamente por nombre
+            const reservasOrdenadas = Object.values(reservasPorPersona).sort((a, b) => 
+                a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+            );
+            
+            if (reservasOrdenadas.length === 0) {
+                reservasLista.style.display = 'none';
+                return;
+            }
+            
+            // Mostrar la sección y generar el contenido
+            reservasLista.style.display = 'block';
+            reservasContenido.innerHTML = '';
+            
+            reservasOrdenadas.forEach(reserva => {
+                // Ordenar los números de cada persona
+                reserva.numeros.sort((a, b) => parseInt(a) - parseInt(b));
+                
+                const reservaDiv = document.createElement('div');
+                reservaDiv.className = 'reserva-item';
+                
+                reservaDiv.innerHTML = `
+                    <div class="reserva-info">
+                        <div class="reserva-nombre">${reserva.nombre}</div>
+                        <div class="reserva-telefono">📞 ${reserva.telefono}</div>
+                    </div>
+                    <div class="reserva-acciones">
+                        <div class="reserva-numeros">${reserva.numeros.join(', ')}</div>
+                        <button class="btn-cancelar" onclick="cancelarReserva('${reserva.nombre}', '${reserva.telefono}')" title="Cancelar todas las reservas de ${reserva.nombre}">
+                            ❌ Cancelar
+                        </button>
+                    </div>
+                `;
+                
+                reservasContenido.appendChild(reservaDiv);
+            });
+        }
+
+        function cancelarReserva(nombre, telefono) {
+            // Mostrar confirmación antes de cancelar
+            const confirmar = confirm(`¿Estás seguro de que quieres cancelar todas las reservas de ${nombre}?`);
+            
+            if (!confirmar) {
+                return;
+            }
+            
+            // Encontrar todos los números reservados por esta persona
+            const numerosACancelar = [];
+            Object.keys(reservas).forEach(numero => {
+                const reserva = reservas[numero];
+                if (reserva.nombre === nombre && reserva.telefono === telefono) {
+                    numerosACancelar.push(numero);
+                }
+            });
+            
+            // Eliminar las reservas
+            numerosACancelar.forEach(numero => {
+                delete reservas[numero];
+            });
+            
+            // Guardar los cambios
+            syncManager.guardarReservas(reservas);
+            
+            // Actualizar la interfaz
+            generarTalonario();
+            
+            // Mostrar mensaje de confirmación
+            mostrarMensaje(`Reservas de ${nombre} canceladas exitosamente (números: ${numerosACancelar.join(', ')})`, 'exito');
         }
 
         function seleccionarNumero(e) {
